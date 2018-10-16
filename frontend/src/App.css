@@ -1,0 +1,56 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  animation: App-logo-spin infinite 20s linear;
+  height: 80px;
+}
+
+.App-header {
+  background-color: #222;
+  height: 150px;
+  padding: 20px;
+  color: white;
+}
+
+.App-title {
+  font-size: 1.5em;
+}
+
+.App-intro {
+  font-size: large;
+}
+
+@keyframes App-logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.d100-sidebar {
+  font-size: 0.8rem;
+  line-height: 0.8rem;
+}
+
+.d100-sidebar .list-group-item{
+  height: 54px;
+  line-height: 32px;
+}
+
+.d100-sidebar .list-group-item .btn{
+  position: absolute;
+  right: 10px;
+  padding: .2rem .2rem 0 .2rem;
+}
+
+.roll {
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 1;
+}
+
+.roll .btn{
+  font-size: 2rem;
+  line-height: 2rem;
+}

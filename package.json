@@ -1,0 +1,22 @@
+{
+  "name": "dnd100",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "npm": "^6.4.1"
+  },
+  "devDependencies": {
+    "concurrently": "^4.0.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "server": "npm start --prefix server",
+    "frontend": "npm start --prefix frontend",
+    "build": "npm run build --prefix frontend",
+    "start": "concurrently \"npm run server\" \"npm run frontend\"",
+    "production": "concurrently \"npm run server\" \"npm run build\""
+  },
+  "author": "",
+  "license": "ISC"
+}

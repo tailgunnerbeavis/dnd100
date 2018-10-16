@@ -4,10 +4,10 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "npm": "^6.4.1"
+    "npm": "^6.4.1",
+    "concurrently": "^4.0.1"
   },
   "devDependencies": {
-    "concurrently": "^4.0.1"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

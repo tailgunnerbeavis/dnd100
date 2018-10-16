@@ -10,12 +10,11 @@
     "express": "^4.16.3",
     "markdown-it": "^8.4.2",
     "npm": "^6.4.1",
-    "snoowrap": "^1.15.2"
-  },
-  "devDependencies": {
+    "snoowrap": "^1.15.2",
     "babel-preset-env": "^1.7.0",
     "babel-register": "^6.26.0"
   },
+  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node start.js"

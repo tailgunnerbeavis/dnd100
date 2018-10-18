@@ -10,7 +10,7 @@ class App extends Component {
     super(props)
     const code = new URL(window.location.href).searchParams.get("code")
     this.state = {
-      importLists: [],
+      importLists: JSON.parse(window.localStorage.getItem('importLists')) || [],
       keys: "", highlighted: "",
       dataStore: window.localStorage,
       code: code,
@@ -20,8 +20,12 @@ class App extends Component {
   }
 
   componentDidMount(){
-    this.getRedditToken()
-    this.getLists()
+    if(this.state.importLists === undefined || this.state.importLists.length === 0) { 
+      this.getLists()
+    }
+    if(this.state.code && !this.state.refreshToken){
+      this.getRedditToken()
+    }
   }
 
   getRedditToken(){
@@ -50,24 +54,16 @@ class App extends Component {
       })
       .catch(error => console.error(error));
 
-    } else {
-      this.getLists()
     }
   }
 
   getLists(){
-    if(!this.state.refreshToken) { return }
-    fetch("/api/v1/reddit/get_lists", {
-      headers: {
-        "Content-Type": "application/json; charset=utf-8"
-      },
-      method: "POST",
-      body: JSON.stringify({refreshToken: this.state.refreshToken})      
-    }).then(res => res.json()
-    ).then(response => this.setState(response))
+    fetch("/api/v1/reddit/get_lists").then(res => res.json()
+    ).then(response => this.setState(response, this.state.dataStore.setItem('importLists', JSON.stringify(response.importLists))))
   }
 
   importLink(link){
+    if(!this.state.refreshToken) { this.getRedditToken() }
     fetch("/api/v1/reddit/import_link", {
       headers: {
         "Content-Type": "application/json; charset=utf-8"

@@ -4,6 +4,7 @@ const app = express.Router();
 const snoowrap = require('snoowrap');
 const MarkdownIt = require('markdown-it');
 const { URL } = require('url');
+const defaultLists = require('../default_lists.json')
 
 const production = process.env.NODE_ENV === 'production'
 const redditAPI = !production ? {
@@ -55,32 +56,9 @@ app.post('/api/v1/reddit/import_link', (req, res) => {
 })
 
 // accepts the refreshToken and returns a list of categorized lists links
-app.post('/api/v1/reddit/get_lists', (req, res) => {
-	var importLists = getLists(req.body.refreshToken)
-	importLists.then(list => res.send(list))
+app.get('/api/v1/reddit/get_lists', (req, res) => {
+  res.send({importLists: defaultLists})
 })
-
-
-function getLists(refreshToken){
-  let r = redditFromRefreshToken(refreshToken)
-  if(!r){ return }
-  return(r.getSubmission('73v0ym').selftext.then((text) => md.parse(text, {})).then(tokens => {
-          let category = null
-          let importLists = tokens.reduce((result, token) => {
-            if(token.type === "inline"){ 
-              if(token.children && token.children.find(child => child.type === "link_open")){
-                let url = token.children.find(child => child.type === "link_open").attrs[0][1]
-                let linkTitle = token.children.find(child => child.type === "text").content
-                result.push(Object.assign({title: linkTitle, url: url, category: category}, getUrlType(url)))
-              } else {
-                category = token.content
-              }
-              
-            } return result
-          }, [])
-          return({importLists: importLists})
-        }))    
-}
 
 function redditFromRefreshToken(refreshToken) {
   var r = new snoowrap({ 

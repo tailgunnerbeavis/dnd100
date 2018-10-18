@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+import logo from './dicelogo.png';
 import './App.css';
 import debounce from 'lodash/debounce';
 const classnames = require('classnames');
@@ -129,8 +129,14 @@ class App extends Component {
     return (
       <div className="App container-fluid" tabIndex="0" onKeyDown={event => this.keyHandler(event)}>
         <header className="App-header row">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">d100</h1>
+          <div className="col-sm-1">
+            <img src={logo} className="App-logo" alt="logo" />
+          </div>
+          <div className="col-sm-11">
+            <h1 className="App-title">dnd100</h1>
+            <h3 className="App-subtitle">RPG Random Generator using lists from <a href="https://www.reddit.com/r/d100/">r/d100</a></h3>
+            <p className="App-description"><a href="https://github.com/tailgunnerbeavis/dnd100">Source code</a></p>
+          </div>
         </header>
         <div className="row">
           <div className="col-xl-3 col-sm-6 d100-sidebar" style={{}}>

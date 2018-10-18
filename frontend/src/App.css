@@ -18,6 +18,14 @@
   font-size: 1.5em;
 }
 
+.App-subtitle {
+  font-size: 1.2em;
+}
+
+.App-description {
+  font-size: 0.8em;
+}
+
 .App-intro {
   font-size: large;
 }

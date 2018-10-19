@@ -96,7 +96,7 @@ function importLink(link, r){
       list = tokens.reduce((result, token, index) => {
         if(index > table_body){
           if(token.type === "inline" && token.content.length > 3) {
-            result.push(token.content)
+            result.push(token.content.replace(/\n/, ""))
           }
         }
         return(result)
@@ -106,7 +106,7 @@ function importLink(link, r){
       console.log("no table regular text")
       list = tokens.reduce((result, token) => {
         if(token.type === "inline" && token.content.match(/^\d+/gm)){
-          result.push(token.content.replace(/^\d+[ -.]*/, ""))
+          result.push(token.content.replace(/^\d+[ -.]*/, "").replace(/\n/, ""))
         }
         return(result)
       }, [])
@@ -115,7 +115,7 @@ function importLink(link, r){
       console.log("no table ordered list")
       list = tokens.reduce((result, token, index) => {
         if(token.type === "inline" && index > ordered_list){
-          result.push(token.content)
+          result.push(token.content.replace(/\n/, ""))
         }
         return(result)
       }, [])

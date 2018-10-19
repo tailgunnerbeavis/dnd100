@@ -40,6 +40,29 @@
   line-height: 0.8rem;
 }
 
+.d100-sidebar:hover .edit{
+  display: block;
+}
+
+.d100-sidebar .edit-bar{
+  position: absolute;
+  display: none;
+  right: 0;
+  margin-right: 1.1em;
+  margin-top: 0.1em;
+  padding: .2rem .2rem .2rem .2rem;
+}
+
+.d100-sidebar .add {
+  position: absolute;
+  right: 40px;
+}
+
+.d100-sidebar.edit .edit-bar,
+.d100-sidebar.edit .edit-bar .btn{
+  display: block;
+}
+
 .d100-sidebar .list-group-item{
   height: 54px;
   line-height: 32px;
@@ -51,11 +74,15 @@
   padding: .2rem .2rem 0 .2rem;
 }
 
+.d100-sidebar .list-group-item .btn.remove{
+  right: 50px;
+}
+
 .roll {
   position: fixed;
   right: 0;
   top: 0;
-  z-index: 1;
+  z-index: 6;
 }
 
 .roll .btn{

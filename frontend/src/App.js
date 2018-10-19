@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 import logo from './dicelogo.png';
 import './App.css';
 import debounce from 'lodash/debounce';
+import AceEditor from 'react-ace';
+import 'brace/mode/markdown';
+import 'brace/theme/tomorrow';
 const classnames = require('classnames');
 
 class App extends Component {
@@ -14,9 +17,11 @@ class App extends Component {
       keys: "", highlighted: "",
       dataStore: window.localStorage,
       code: code,
-      refreshToken: window.localStorage.getItem('refreshToken')
+      refreshToken: window.localStorage.getItem('refreshToken'),
+      edit: false
     }
     this.setHighlighted = debounce(this.setHighlighted, 500)
+    this.saveImportLists = debounce(this.saveImportLists, 1000)
   }
 
   componentDidMount(){
@@ -81,10 +86,11 @@ class App extends Component {
   }
 
   showList(index){
-    this.setState({displayedList: index}, () => {document.querySelector('.displayed-list').scrollIntoView({ 
-                                                  behavior: 'smooth',
-                                                  block : 'start'
-                                                })})
+    this.setState({displayedList: index}, () => {if(!this.state.edit) {
+                                                  document.querySelector('.displayed-list').scrollIntoView({ 
+                                                    behavior: 'smooth',
+                                                    block : 'start'
+                                                  })}})
   }
 
   scrollToHighlighted(){
@@ -95,14 +101,61 @@ class App extends Component {
     }    
   }
 
+  saveImportLists = () => {
+    this.state.dataStore.setItem('importLists', JSON.stringify(this.state.importLists))
+  }
+
   setHighlighted = () => {
     this.setState({highlighted: this.state.keys, keys: ""})
     this.scrollToHighlighted()
   }
 
   reroll = () => {
-    let roll = Math.floor(Math.random() * Math.floor(99)) + 1
+    let roll = Math.floor(Math.random() * Math.floor(this.state.importLists[this.state.displayedList].list.length)) + 1
     this.setState({keys: roll}, this.setHighlighted())
+  }
+
+  editList = (newValue) => {
+    let list = newValue.split("\n")
+    let importLists = this.state.importLists
+    importLists[this.state.displayedList].list = list
+    this.setState({importLists: importLists}, this.saveImportLists()) 
+  }
+
+  addList = () => {
+    let newList = {
+      category: "Default",
+      id: "",
+      list: [],
+      title: "New List",
+      type: "local",
+      url: Math.random().toString(36).replace('0.', '')
+    }
+    let importLists = this.state.importLists
+    importLists.push(newList)
+    this.setState({importLists: importLists}, () => {this.saveImportLists(); this.showList(importLists.length - 1)})
+  }
+
+  deleteList = (index) => {
+    let importLists = this.state.importLists
+    importLists.splice(index, 1)
+    this.setState({importLists: importLists, displayedList: undefined}, this.saveImportLists())
+  }
+
+  toggleEdit = () => {
+    this.setState({edit: !this.state.edit})
+  }
+
+  editTitle = (e) => {
+    let importLists = this.state.importLists
+    importLists[this.state.displayedList].title = e.target.value
+    this.setState({importLists: importLists})
+  }
+
+  editCategory = (e) => {
+    let importLists = this.state.importLists
+    importLists[this.state.displayedList].category = e.target.value
+    this.setState({importLists: importLists})
   }
 
   keyHandler(event) {
@@ -135,7 +188,9 @@ class App extends Component {
           </div>
         </header>
         <div className="row">
-          <div className="col-xl-3 col-sm-6 d100-sidebar" style={{}}>
+          <div className={classnames("col-xl-3 col-sm-6 d100-sidebar", this.state.edit ? "edit" : null)}>
+          <i className={classnames("edit-bar add material-icons btn", "btn-outline-primary")} onClick={this.addList}>add</i>
+          <i className={classnames("edit-bar edit material-icons btn", this.state.edit ? "btn-primary": "btn-outline-primary")} onClick={this.toggleEdit}>edit</i>
           {categories.map(category => {
             return(
                 <div className="" style={{textAlign: "left", padding: "1em"}} key={category+'div'}>
@@ -144,7 +199,8 @@ class App extends Component {
                   {this.state.importLists.filter(list => list.category === category).map((link, id) => {
                       return(
                           <li className="list-group-item" key={category+"li"+id}>
-                          <a key={category+"a"+id} href={link.url} target="blank">{link.title}</a>
+                          <a key={category+"a"+id} href={link.type==="reddit" ? link.url : null} target="blank">{link.title}</a>
+                          {this.state.edit ? <i className={classnames("remove material-icons btn", "btn-outline-danger")} onClick={() => this.deleteList(this.state.importLists.findIndex((list) => list.url === link.url))}>remove</i> : null}
                           {link.type ? (link.list ? 
                             <i className="material-icons btn btn-primary"  onClick={() => this.showList(this.state.importLists.findIndex((list) => list.url === link.url))}>keyboard_arrow_right</i> : 
                             <i className="material-icons btn btn-outline-primary" onClick={() => this.importLink(link)}>cloud_download</i>) : null}
@@ -156,20 +212,57 @@ class App extends Component {
             )}
           )}
           </div>
-          {this.state.displayedList >= 0 ? 
-            <div className="col-xl-9 col-sm-6 displayed-list">
-              <h1>{this.state.importLists[this.state.displayedList].category} - {this.state.importLists[this.state.displayedList].title}</h1>
-                <ol className="list-group" style={{textAlign: "left", lineHeight: "1.5rem"}}>
-                  {this.state.importLists[this.state.displayedList].list.map((item, index) => {
-                    return(
-                      <li id={"index" + index + 1} key={"index" + index + 1} className={classnames("list-group-item", (index + 1) === parseInt(this.state.highlighted, 10) ? "active" : null)}>
-                        {index + 1 + ". " + item}
-                      </li>
-                    )
-                  })}
-                </ol>
-              </div> 
-            : null}
+          {this.state.edit ? 
+            (this.state.displayedList >= 0 ? 
+                          <div className="col-xl-9 col-sm-6 editing-list">
+                            <label for="category">Category:</label>
+                            <input 
+                              id="category"
+                              className="category" 
+                              value={this.state.importLists[this.state.displayedList].category}
+                              onChange={this.editCategory} />
+                            <label for="title">Title:</label>
+                            <input 
+                              id="title"
+                              className="title" 
+                              value={this.state.importLists[this.state.displayedList].title}
+                              onChange={this.editTitle} />
+                            <AceEditor
+                              mode="markdown"
+                              theme="tomorrow"
+                              onChange={this.editList}
+                              name="editor"
+                              editorProps={{$blockScrolling: true}}
+                              width="100%"
+                              fontSize={14}
+                              minLines={100}
+                              wrapEnabled={true}
+                              value={this.state.importLists[this.state.displayedList].list.join('\n')} />
+                             <ol className="list-group" style={{textAlign: "left", lineHeight: "1.5rem"}}>
+                               {this.state.importLists[this.state.displayedList].list.map((item, index) => {
+                                 return(
+                                   <li id={"index" + index + 1} key={"index" + index + 1} className={classnames("list-group-item", (index + 1) === parseInt(this.state.highlighted, 10) ? "active" : null)}>
+                                     {index + 1 + ". " + item}
+                                   </li>
+                                 )
+                               })}
+                             </ol>
+                           </div> 
+                          : null) :
+            (this.state.displayedList >= 0 ? 
+                          <div className="col-xl-9 col-sm-6 displayed-list">
+                            <h1>{this.state.importLists[this.state.displayedList].category} - {this.state.importLists[this.state.displayedList].title}</h1>
+                              <ol className="list-group" style={{textAlign: "left", lineHeight: "1.5rem"}}>
+                                {this.state.importLists[this.state.displayedList].list.map((item, index) => {
+                                  return(
+                                    <li id={"index" + index + 1} key={"index" + index + 1} className={classnames("list-group-item", (index + 1) === parseInt(this.state.highlighted, 10) ? "active" : null)}>
+                                      {index + 1 + ". " + item}
+                                    </li>
+                                  )
+                                })}
+                              </ol>
+                            </div> 
+                          : null)}
         </div>
         <div className="roll" onClick={this.scrollToHighlighted}>
           <h3 className="btn btn-primary"><i className="material-icons" onClick={this.reroll}>replay</i>{this.state.keys || this.state.highlighted}</h3>
